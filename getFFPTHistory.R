@@ -45,7 +45,7 @@ content<-content[-1,]
 #loop through sections
  
 
-  #loop through each table row section
+  #loop through each table row section 
   
 
  for(i in 1:length(thetable$children[[2]]$children))
