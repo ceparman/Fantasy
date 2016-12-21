@@ -1,9 +1,27 @@
 
-getSchedule<-function()
+getFFPThistory<-function(year,week,position,scoring="Fanduel")
 {
-  
 
-theurl <-"http://thehuddle.com/stats/2016/plays_weekly.php?pos=DF&week=10&ccs=96672"
+#there are small difference between FD scoring and thsi site  
+#need to modify position to convert from Fanduel to thhuddle format  
+  
+if( position == "K") position <- "PK"
+    
+if( position == "D") position <- "DF"
+  
+if (scoring == "Fanduel") ccs<-96672 else stop("I don't know that scoring system")
+
+theurl <- paste0("http://thehuddle.com/stats/",year,"/","plays_weekly.php?pos=",position,"&week=",week,"&ccs=",ccs)
+
+
+print(theurl)
+
+FPTScol <- 4 
+
+if( position == "DF")  FPTScol <- 3
+
+
+#theurl <-"http://thehuddle.com/stats/2016/plays_weekly.php?pos=DF&week=10&ccs=96672"
 
 # Download page using RCurl
 # You may need to set proxy details, etc.,  in the call to getURL
@@ -27,22 +45,25 @@ content<-content[-1,]
 #loop through sections
 
 
-  #loop through each section
-   for(i in 1:length(thetable$children[[2]]$children))
+  #loop through each table row section
+  
+
+ for(i in 1:length(thetable$children[[2]]$children))
   {
    
     
-    tablerow <- thetable$children[[2]]$children[[i]] 
+   tablerow <- thetable$children[[2]]$children[i]
    
     
+  #  xmlValue(thetable$children[2]$tbody$children[1]$tr$children[2]$td)
   
      
     
-   player <- as.character(xmlValue(tablerow$children[[1]]))
+   player <- as.character(xmlValue(tablerow$tr$children[1]$td))
     
-    team  <- as.character(xmlValue(tablerow$children[[2]]))
+    team  <- as.character(xmlValue(tablerow$tr$children[2]$td))
     
-    FPTS <-as.numeric(xmlValue(tablerow$children[[3]]))
+    FPTS <-as.numeric(xmlValue(tablerow$tr$children[FPTScol]$td))
     
     content <- rbind(content, 
                      data.frame(player = player, team = team, FPTS=FPTS ) )
@@ -53,15 +74,6 @@ content<-content[-1,]
   }
   
   
-
-  
- 
-
-
-content$home <- as.character(content$home)
-content$away <- as.character(content$away)
-content$time <- as.character(content$time)
-content$day <- as.character(content$day)
 
 content
 }
