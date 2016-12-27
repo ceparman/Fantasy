@@ -37,12 +37,12 @@ for(i in 1:length(thetable$children))
     tablerow <- thetable$children[[i]]$children[[j]] 
    
     
-    if (length(grep("@",xmlValue(tablerow$children[[1]]))) >0) {
+    if (length(grep("@|vs.",xmlValue(tablerow$children[[1]]))) >0) {
      
       
-    away <- trim(strsplit(xmlValue(tablerow$children[[1]]),"@")[[1]][1])
+    away <- trim(strsplit(xmlValue(tablerow$children[[1]]),"@|vs.")[[1]][1])
     
-    home  <- trim(strsplit(xmlValue(tablerow$children[[1]]),"@")[[1]][2])
+    home  <- trim(strsplit(xmlValue(tablerow$children[[1]]),"@|vs.")[[1]][2])
     
     time <-strsplit(xmlValue(tablerow$children[[2]])," ")[[1]][1]
     

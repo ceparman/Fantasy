@@ -1,12 +1,16 @@
 
 
 source("possitiondifferntials.R")
+source("buildplayerrisk.R")
 
-mydata <- read.csv("FanDuel-NFL-2016-12-24-17370-players-list.csv",as.is=TRUE,header=TRUE)
+
+mydata <- read.csv("FanDuel-NFL-2016-12-24-17371-players-list.csv",as.is=TRUE,header=TRUE)
+mydata$player <- paste0(mydata$First.Name," ",mydata$Last.Name)
+
 mydata$value <- mydata$FPPG/mydata$Salary
 mydata$value[is.infinite(mydata$value)] <- 0
 
-
+mydata<-inner_join(mrisk,mydata,by="player")
 
 
 
@@ -17,6 +21,12 @@ iflags<-c("O","IR","NA","Q")
 mydata$FPPG[mydata$Injury.Indicator %in% iflags] <- 0
 
 mydata$FPPG[is.na(mydata$Injury.Indicator)] <- 0
+
+
+#set sd of na to 20% of points
+
+
+mydata$sd[which(is.na(mydata$sd))]<-  mydata$FPPG[which(is.na(mydata$sd))]*.2
 
 
 #scale rb by rushranks
@@ -44,11 +54,15 @@ mydata$FPPG[mydata$Position =="D"] <-mydata$FPPG[mydata$Position =="D"] * mydata
 
 
 
+#set sd to min of FFPG
+
+mydata$sd[which((mydata$FPPG - mydata$sd) < 0)] <- mydata$FPPG[which((mydata$FPPG - mydata$sd) < 0)]
 
 
 
 
-name <- paste0(mydata$First.Name," ",mydata$Last.Name)
+
+name <- paste0(mydata$First.Name.x," ",mydata$Last.Name.x)
 pos <- mydata$Position
 pts <- mydata$FPPG
 cost <- mydata$Salary
@@ -69,9 +83,12 @@ for(i in 2:numteams)
 }
 
 
-f <- mydata$value
 
 f <- pts
+
+r<- mydata$sd 
+
+#r <- (1+runif(length(name)))*f*.2
 
 var.types <- rep("B", num.players)
  
@@ -83,7 +100,8 @@ A <- rbind(as.numeric(pos=="QB")
            , as.numeric(pos=="K")
            , as.numeric(pos== "D")
            ,teammatrix
-           ,cost)
+           ,cost
+           ,pts)
 
 dir <- c("=="
          ,"=="
@@ -91,8 +109,9 @@ dir <- c("=="
          ,"=="
          ,"=="
          ,"=="
+         ,rep("<=",numteams)
          ,"<="
-         ,rep("<=",numteams))
+         ,">=")
 
 b <- c(  1
        , 2
@@ -101,16 +120,17 @@ b <- c(  1
        , 1
        , 1
        ,rep(4,numteams)
-       ,60000)
+       ,60000
+       ,120)
 
 library(Rglpk)
 
-sol <- Rglpk_solve_LP(obj = f
+sol <- Rglpk_solve_LP(obj = r
                       , mat = A
                       , dir = dir
                       , rhs = b
                       , types = var.types
-                      , max=TRUE)
+                      , max=FALSE)
 sol
 
 paste0( name[sol$solution == 1], "  " ,pos[sol$solution == 1]," ",

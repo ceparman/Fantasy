@@ -18,9 +18,21 @@ shortName <- c(
   "MIA",         "TEN",     "WAS",    "CIN",   
   "DET",       "OAK",       "NYJ",       "SD",    
   "JAC",  "CAR",      "IND",  "ATL",      
-  "TN",     "CLE",     "NO",   "SF"
+  "TB",     "CLE",     "NO",   "SF"
+  
+)
+
+team <- c(
+          "Vikings", " Seahawks", "Partiots", "Eagles",
+          "Broncos", "Cardinals", "Cowboys" , "Chiefs",
+          "Ravens", "Giants", "Texans", "Steelers",
+          "Bills", "Rams", "Packers", "Bears",
+          "Dolphins", "Titians", "Redskins", "Bengals",
+          "Lions", "Raiders", "Jets", "Chargers",
+          "Jaguars", "Panthers", "Colts", "Falcons",
+           "Buccaneers", "Browns", "Saints", "49ers" 
   
 )
   
 
-teams<-data.frame(shortName = shortName, longName = longName )
+teams<-data.frame(shortName = shortName, longName = longName,team = team , as.is=TRUE)

@@ -1,6 +1,8 @@
 
 getFFPThistory<-function(year,week,position,scoring="Fanduel")
 {
+  
+source("teams.R")  
 
 #there are small difference between FD scoring and thsi site  
 #need to modify position to convert from Fanduel to thhuddle format  
@@ -38,7 +40,7 @@ body <- pagetree$children$html$children$body
 
 thetable  <-body$children[[10]]$children$div[[2]]$children$div[[5]]$children$div[[1]]
 
-content <-  data.frame(player = "1",   team = "1" , FPTS=1)
+content <-  data.frame(player = "1",  Last.Name ="1", First.Name = "1", team = "1" , FPTS=1,as.is=TRUE)
 content<-content[-1,]
 
 
@@ -51,22 +53,44 @@ content<-content[-1,]
  for(i in 1:length(thetable$children[[2]]$children))
   {
    
+   #print(i)
     
    tablerow <- thetable$children[[2]]$children[i]
    
     
   #  xmlValue(thetable$children[2]$tbody$children[1]$tr$children[2]$td)
   
+   if( position != "DF")
+   {
+     player <- as.character(xmlValue(tablerow$tr$children[1]$td))
+    
+     First.Name <- strsplit(player, " ")[[1]][[1]]
+     Last.Name <-  strsplit(player, " ")[[1]][[2]]
+    }
+   
+   else {
+      
+      First.Name <- as.character(xmlValue(tablerow$tr$children[1]$td))
      
+      sn <-xmlValue(tablerow$tr$children[2]$td)
     
-   player <- as.character(xmlValue(tablerow$tr$children[1]$td))
-    
+      if(sn == "ARI") sn <- 'AZ'
+      
+      Last.Name <- as.character( teams$team[which(teams$shortName == sn)])
+      
+      player <- paste0(First.Name," ",Last.Name)
+      
+    }
+      
+    #print(sn)
     team  <- as.character(xmlValue(tablerow$tr$children[2]$td))
     
     FPTS <-as.numeric(xmlValue(tablerow$tr$children[FPTScol]$td))
-    
+    # print(player)
+    # print(Last.Name)
+    # print(First.Name)
     content <- rbind(content, 
-                     data.frame(player = player, team = team, FPTS=FPTS ) )
+                     data.frame(player = player, Last.Name = Last.Name, First.Name = First.Name, team = team, FPTS=FPTS ) )
     
     
     
@@ -77,3 +101,5 @@ content<-content[-1,]
 
 content
 }
+
+getFFPThistory("2016","1","D")
